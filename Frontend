@@ -1,0 +1,80 @@
+// Frontend - React
+import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import Signup from "./components/Signup";
+import Login from "./components/Login";
+import Dashboard from "./components/Dashboard";
+import ModeratorPanel from "./components/ModeratorPanel";
+import SwipePage from "./components/SwipePage";
+import Chat from "./components/Chat";
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/moderator" element={<ModeratorPanel />} />
+        <Route path="/swipe" element={<SwipePage />} />
+        <Route path="/chat" element={<Chat />} />
+        <Route path="*" element={<Navigate to="/login" />} />
+      </Routes>
+    </Router>
+  );
+}
+export default App;
+
+// Swipe Page Component
+import TinderCard from "react-tinder-card";
+
+function SwipePage() {
+  const [profiles, setProfiles] = useState([]);
+
+  useEffect(() => {
+    fetch("/api/users")
+      .then(res => res.json())
+      .then(data => setProfiles(data));
+  }, []);
+
+  return (
+    <div className="swipe-container">
+      {profiles.map(profile => (
+        <TinderCard key={profile.id} className="swipe-card">
+          <div className="profile-card" style={{ backgroundImage: `url(${profile.image})` }}>
+            <h3>{profile.name}, {profile.age}</h3>
+          </div>
+        </TinderCard>
+      ))}
+    </div>
+  );
+}
+export default SwipePage;
+
+// Chat Component
+import React, { useState } from "react";
+
+function Chat() {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+
+  const sendMessage = () => {
+    if (input.trim() !== "") {
+      setMessages([...messages, { text: input, sender: "You" }]);
+      setInput("");
+    }
+  };
+
+  return (
+    <div className="chat-container">
+      <div className="messages">
+        {messages.map((msg, index) => (
+          <div key={index} className="message">{msg.sender}: {msg.text}</div>
+        ))}
+      </div>
+      <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Type a message..." />
+      <button onClick={sendMessage}>Send</button>
+    </div>
+  );
+}
+export default Chat;
