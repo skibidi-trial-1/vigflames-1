@@ -4,9 +4,13 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
-const chatRoutes = require("./routes/chatRoutes");
+const http = require("http");
+const socketIo = require("socket.io");
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
+
 app.use(express.json());
 app.use(cors());
 
@@ -18,8 +22,14 @@ mongoose.connect("mongodb+srv://your-mongo-uri", {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/chat", chatRoutes);
 
-app.listen(5000, () => {
+io.on("connection", (socket) => {
+  console.log("New user connected");
+  socket.on("message", (msg) => {
+    io.emit("message", msg);
+  });
+});
+
+server.listen(5000, () => {
   console.log("Server running on port 5000");
 });
